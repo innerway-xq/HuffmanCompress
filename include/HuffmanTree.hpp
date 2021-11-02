@@ -7,7 +7,10 @@
 #include <vector>
 #include <functional>
 
-typedef std::map<std::string, std::string> HuffmanMap_T;
+#define uc unsigned char
+
+typedef std::map<uc, std::string> Word2Code_T;
+typedef std::map<std::string, uc> Code2Word_T;
 extern int nodes_num;
 
 class HuffmanTreeNode
@@ -17,8 +20,10 @@ private:
     HuffmanTreeNode *father = nullptr;
     char lr = 0; // 0-left_son, 1-right_son
 public:
-    int idx;
-    HuffmanTreeNode(int v, HuffmanTreeNode *f, char _lr);
+    int idx=0;
+    HuffmanTreeNode();
+    HuffmanTreeNode(int v);
+    HuffmanTreeNode(int v, HuffmanTreeNode* real_addr);
     bool operator<(const HuffmanTreeNode &x) const;
     void SetValue(int v);
     void SetFather(HuffmanTreeNode *f);
@@ -28,7 +33,7 @@ public:
     std::string GenerateCode();
 };
 
-extern std::map<int, HuffmanTreeNode*> idx2nodes;
+extern std::map<int, HuffmanTreeNode *> idx2nodes;
 extern HuffmanTreeNode *word2nodes_addr[256];
 
 struct HuffmanForest_Queue_Cmp
@@ -41,19 +46,19 @@ class HuffmanForest
 {
 private:
     HuffmanForest_Queue nodes;
+
 public:
     HuffmanForest();
     bool is_Tree();
-    void AddNode(HuffmanTreeNode *x, char word);
+    void AddNode(HuffmanTreeNode *x, uc word);
     void Pop();
-    HuffmanTreeNode* Top();
+    HuffmanTreeNode *Top();
     void Push(HuffmanTreeNode *x);
-    HuffmanMap_T GenerateWord2Code();
-    HuffmanMap_T GenerateCode2Word();
+    Word2Code_T GenerateWord2Code();
+    Code2Word_T GenerateCode2Word();
 };
 
-HuffmanTreeNode* MergeHuffmanTree(HuffmanTreeNode *x, HuffmanTreeNode *y);
+HuffmanTreeNode *MergeHuffmanTree(HuffmanTreeNode *x, HuffmanTreeNode *y);
 void GenerateHuffmanTree(HuffmanForest *x);
-std::string uchar2string(unsigned char x);
 
 #endif

@@ -10,15 +10,20 @@ int main()
     xqz_in(".\\sample\\test");
     
     HuffmanForest* x = new HuffmanForest;
-    HuffmanTreeNode temp1 = HuffmanTreeNode(32,nullptr,0);
-    x->AddNode(&temp1,'C');
-    
+    HuffmanTreeNode* nodes_array = new HuffmanTreeNode[256];
+    for(int i = 0; i<256; ++i){
+        if(word_freq[i]){
+            nodes_array[i] = HuffmanTreeNode(word_freq[i], nodes_array + i);
+            x->AddNode(nodes_array+i,(uc)i);
+        }
+    }
     GenerateHuffmanTree(x);
-    HuffmanMap_T y = x->GenerateWord2Code();
+    cout<<"GenerateHuffmanTree finished"<<endl;
+    Word2Code_T y = x->GenerateWord2Code();
     while(1){
-        unsigned char temp;
+        uc temp;
         cin>>temp;
-        cout<<y.at(uchar2string(temp))<<endl;
+        cout<<y.at(temp)<<endl;
     }
     return 0;
 }

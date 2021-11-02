@@ -1,21 +1,23 @@
 #include "xqzio.hpp"
 #include <iostream>
 #include <fstream>
-#define ull unsigned long long
-using std::ifstream;
-using std::ios;
+
 using std::cout;
 using std::endl;
+using std::ifstream;
+using std::ios;
 
-ull word_freq[256]={};
+ull word_freq[256] = {};
 const int MAX_INPUT_N = 0x1000;
 
-void xqz_in(const char *filename){
-    char buf[MAX_INPUT_N] = {};
+void xqz_in(const char *filename)
+{
+    uc buf[MAX_INPUT_N] = {};
     ifstream fin;
-    fin.open(filename,ios::in|ios::binary);
-    if(!fin){
-        cout<<"open file failed"<<endl;
+    fin.open(filename, ios::in | ios::binary);
+    if (!fin)
+    {
+        cout << "open file failed" << endl;
         return;
     }
     fin.seekg(0, ios::end);
@@ -24,15 +26,17 @@ void xqz_in(const char *filename){
     fin.seekg(0, ios::beg);
     for (ull i = 1; i <= max_i; ++i)
     {
-        fin.read(buf, MAX_INPUT_N);
-        cnt_freq(buf,MAX_INPUT_N);
+        fin.read((char *)buf, MAX_INPUT_N);
+        cnt_freq(buf, MAX_INPUT_N);
     }
-    fin.read(buf,length%MAX_INPUT_N);
+    fin.read((char *)buf, length % MAX_INPUT_N);
     cnt_freq(buf, length % MAX_INPUT_N);
-    cout<<"input finished"<<endl;
+    cout << "input finished" << endl;
 }
-void cnt_freq(char *x,int l){
-    for(ull i=0;i<l;i++){
+void cnt_freq(uc *x, int l)
+{
+    for (ull i = 0; i < l; i++)
+    {
         ++word_freq[x[i]];
     }
 }
