@@ -7,7 +7,7 @@ $(target) : $(objects)
 	del $^
 
 $(objects) : %.o : %.cpp
-	g++ -c $? -o $@ -Iinclude
+	g++ -c $? -o $@ -Iinclude -O2
 
 .PHONY : clean
 clean :

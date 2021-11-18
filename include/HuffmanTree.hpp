@@ -6,12 +6,15 @@
 #include <queue>
 #include <vector>
 #include <functional>
+#include <fstream>
 
 #define uc unsigned char
 
 typedef std::map<uc, std::string> Word2Code_T;
 typedef std::map<std::string, uc> Code2Word_T;
 extern int nodes_num;
+extern Word2Code_T word2code;
+extern Code2Word_T code2word;
 
 class HuffmanTreeNode
 {
@@ -20,10 +23,10 @@ private:
     HuffmanTreeNode *father = nullptr;
     char lr = 0; // 0-left_son, 1-right_son
 public:
-    int idx=0;
+    int idx = 0;
     HuffmanTreeNode();
     HuffmanTreeNode(int v);
-    HuffmanTreeNode(int v, HuffmanTreeNode* real_addr);
+    HuffmanTreeNode(int v, HuffmanTreeNode *real_addr);
     bool operator<(const HuffmanTreeNode &x) const;
     void SetValue(int v);
     void SetFather(HuffmanTreeNode *f);
@@ -60,5 +63,6 @@ public:
 
 HuffmanTreeNode *MergeHuffmanTree(HuffmanTreeNode *x, HuffmanTreeNode *y);
 void GenerateHuffmanTree(HuffmanForest *x);
+void Code2WordinFile(std::ofstream &fout);
 
 #endif

@@ -2,11 +2,15 @@
 #include <utility>
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <cstring>
 using std::pair;
 using std::string;
 
 int nodes_num = 0;
 std::map<int, HuffmanTreeNode *> idx2nodes;
+Word2Code_T word2code;
+Code2Word_T code2word;
 HuffmanTreeNode *word2nodes_addr[256] = {};
 
 HuffmanTreeNode::HuffmanTreeNode()
@@ -22,7 +26,7 @@ HuffmanTreeNode::HuffmanTreeNode(int v)
     idx = nodes_num;
     idx2nodes.insert(pair<int, HuffmanTreeNode *>(nodes_num++, this));
 }
-HuffmanTreeNode::HuffmanTreeNode(int v, HuffmanTreeNode* real_addr)
+HuffmanTreeNode::HuffmanTreeNode(int v, HuffmanTreeNode *real_addr)
 {
     value = v;
     idx = nodes_num;
@@ -102,7 +106,7 @@ HuffmanTreeNode *HuffmanForest::Top()
 Word2Code_T HuffmanForest::GenerateWord2Code()
 {
     Word2Code_T temp;
-    for (uc i = 0;; ++i)
+    for (register uc i = 0;; ++i)
     {
         if (word2nodes_addr[i])
         {
@@ -130,8 +134,8 @@ HuffmanTreeNode *MergeHuffmanTree(HuffmanTreeNode *x, HuffmanTreeNode *y)
     HuffmanTreeNode *ret = new HuffmanTreeNode(x->GetValue() + y->GetValue());
     x->SetFather(ret);
     y->SetFather(ret);
-    x->SetLR('0');
-    y->SetLR('1');
+    x->SetLR(0);
+    y->SetLR(1);
     return ret;
 }
 void GenerateHuffmanTree(HuffmanForest *x)
@@ -144,4 +148,32 @@ void GenerateHuffmanTree(HuffmanForest *x)
         x->Pop();
         x->Push(MergeHuffmanTree(temp1, temp2));
     }
+}
+void Code2WordinFile(std::ofstream &fout)
+{
+    char temp[10000] = {};
+    int l = 0;
+    Code2Word_T::iterator it;
+    string::iterator i;
+    for (it = code2word.begin(); it != code2word.end(); ++it)
+    {
+        string tmp_str = it->first;
+        for (i = (tmp_str).begin(); i != (tmp_str).end(); ++i)
+        {
+            if (*i)
+            {
+                temp[l++] = '1';
+            }
+            else
+            {
+                temp[l++] = '0';
+            }
+        }
+        temp[l++] = ':';
+        temp[l++] = it->second;
+        temp[l++] = '\n';
+    }
+    temp[l++] = '*';
+    temp[l++] = '\n';
+    fout.write(temp, l);
 }
