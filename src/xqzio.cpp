@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <sys/stat.h>
 
 using std::cout;
 using std::endl;
@@ -13,25 +14,64 @@ using std::string;
 
 ull word_freq[256] = {};
 const int MAX_IO_N = 0x1000;
+std::vector<string> files;
 
-void GetRootPath(char *root, char *relative_addr)
+bool isFile(const char *path)
 {
-    int target_l = strlen(root);
-    int j = 0;
-    relative_addr[j++] = '\n';
-    for(int i = target_l-1; i >= 0; --i){
-        if(root[i] == '/'){
-            root[i] = '\0';
-            break;
-        }
-        relative_addr[j++] = root[i];
+    struct stat buf;
+    stat(path, &buf);
+    if (_S_IFDIR & buf.st_mode)
+    {
+        cout << "folder" << endl;
+        return false;
     }
-    relative_addr[j++] = '/';
-    relative_addr[j++] = '.';
-    for(int i = 0;i < j/2; ++i){
-        char tmp = relative_addr[i];
-        relative_addr[i] = relative_addr[j - i - 1];
-        relative_addr[j - i - 1] = tmp;
+    else if (_S_IFREG & buf.st_mode)
+    {
+        cout << "file" << endl;
+        return true;
+    }
+}
+int GetFileSize(const char *file_path)
+{
+    struct stat buf;
+    stat(file_path, &buf);
+    return buf.st_size;
+}
+
+string GetRootPath(string &src)
+{
+    int target_l = src.size();
+    string ret;
+    for (int i = target_l - 1; i >= 0; --i)
+    {
+        if (src[i] == '/')
+        {
+            ret.assign(src).erase(i);
+            return ret;
+        }
+    }
+}
+
+void GetFolderFiles(string root)
+{
+    long file_handle;
+    struct _finddata_t fileinfo;
+    string tmp;
+    if ((file_handle = _findfirst(tmp.assign(root).append("/*").c_str(), &fileinfo)))
+    {
+        do
+        {
+            if ((fileinfo.attrib & _A_SUBDIR))
+            {
+                if ((strcmp(fileinfo.name, ".")) && (strcmp(fileinfo.name, "..")))
+                    GetFolderFiles(tmp.assign(root).append("/").append(fileinfo.name));
+            }
+            else
+            {
+                files.push_back(tmp.assign(root).append("/").append(fileinfo.name));
+            }
+        } while (!(_findnext(file_handle, &fileinfo)));
+        _findclose(file_handle);
     }
 }
 
@@ -56,6 +96,7 @@ void xqz_read_src(const char *filename)
     }
     fin.read((char *)buf, length % MAX_IO_N);
     cnt_freq(buf, length % MAX_IO_N);
+    fin.close();
     cout << filename << " input finished" << endl;
 }
 void cnt_freq(uc *x, int l)
@@ -65,7 +106,16 @@ void cnt_freq(uc *x, int l)
         ++word_freq[x[i]];
     }
 }
-void xqz_write_dest(const char *srcfilename, const char *destfilename, char *relative_addr)
+ull cnt_code_bytes()
+{
+    ull ret;
+    for (int i = 0; i < 256; ++i)
+    {
+        ret += word_freq[i] * word2code[(uc)i].size();
+    }
+    return ret;
+}
+void xqz_write_dest(const char *srcfilename, const char *relative_addr, const char *destfilename)
 {
     uc buf_out[MAX_IO_N] = {};
     ofstream fout;
@@ -75,9 +125,14 @@ void xqz_write_dest(const char *srcfilename, const char *destfilename, char *rel
         cout << "open destfile failed" << endl;
         return;
     }
-    fout.write(relative_addr,strlen(relative_addr));
+    fout.write(relative_addr, strlen(relative_addr));
+    fout.write("\n", 1);
+    char dest_length[25] = {};
+    sprintf(dest_length,"%llu", cnt_code_bytes());
+    fout.write(dest_length, strlen(dest_length));
+    fout.write("\n", 1);
     Code2WordinFile(fout);
-    
+
     uc buf_in[MAX_IO_N] = {};
     ifstream fin;
     fin.open(srcfilename, ios::in | ios::binary);
@@ -170,5 +225,9 @@ void xqz_write_dest(const char *srcfilename, const char *destfilename, char *rel
         memset(buf_out, 0, sizeof(buf_out));
         out_l = 0;
     }
+
+    fout.write("\n", 1);
+    fin.close();
+    fout.close();
     cout << srcfilename << " compress finished" << endl;
 }
