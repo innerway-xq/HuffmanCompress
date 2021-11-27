@@ -48,6 +48,19 @@ void compress_file(const char *src, string relative_addr, string dest)
     xqz_write_dest(src, relative_addr.c_str(), dest.c_str());
 }
 
+bool dest_exist(string dest)
+{
+    int x = access(dest.c_str(), 0);
+    if (x == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 int main(int argc, char **argv)
 {
     LARGE_INTEGER m_nFreq;
@@ -56,7 +69,7 @@ int main(int argc, char **argv)
     QueryPerformanceFrequency(&m_nFreq);    // 获取时钟周期
     QueryPerformanceCounter(&m_nBeginTime); // 获取时钟计数
 
-    char *target = (char *)"./sample/test1";
+    char *target = (char *)"./sample/emptyfolders";
 
     if (target[strlen(target) - 1] == '/')
         target[strlen(target) - 1] = '\0';
@@ -74,11 +87,17 @@ int main(int argc, char **argv)
         cout << "root:" << root << endl
              << "rela:" << relative_addr << endl
              << "dest:" << dest << endl;
+        if (dest_exist(dest))
+        {
+            cout << "compressed file exists" << endl;
+            sp;
+            return 0;
+        }
 
-        ofstream fout(dest,ios::app|ios::binary);
-        fout.write("1\n",2);
+        ofstream fout(dest, ios::app | ios::binary);
+        fout.write("1\n", 2);
         fout.close();
-        
+
         compress_file(target, relative_addr, dest);
     }
     else
@@ -89,17 +108,38 @@ int main(int argc, char **argv)
         root.assign(target);
         GetFolderFiles(root);
         dest.assign(target).append(".xqz");
+        if (dest_exist(dest))
+        {
+            cout << "compressed file exists" << endl;
+            sp;
+            return 0;
+        }
 
         ofstream fout(dest, ios::app | ios::binary);
         fout.write("0\n", 2);
         relative_addr.assign(target);
         relative_addr = "." + relative_addr.substr(GetRootPath(root).size()) + "\n";
         fout.write(relative_addr.c_str(), relative_addr.size());
+        if(empty_folders[0] == root){
+            fout.write("0\n", 2);
+        }
+        else{
+            char empty_folder_num[25]={};
+            sprintf(empty_folder_num, "%d\n", empty_folders.size());
+            fout.write(empty_folder_num,strlen(empty_folder_num));
+            for(string i : empty_folders){
+                i = i.substr(GetRootPath(i).size()) + "\n";
+                fout.write(i.c_str(),i.size());
+            }
+        }
+        char file_num[25] = {};
+        sprintf(file_num, "%d\n", files.size());
+        fout.write(file_num, strlen(file_num));
         fout.close();
 
-        for(string i : files)
+        for (string i : files)
         {
-            relative_addr.assign(i).erase(0,strlen(target));
+            relative_addr.assign(i).erase(0, strlen(target));
             // cout<<i<<" "<<relative_addr<<endl;
             compress_file(i.c_str(), relative_addr, dest);
         }

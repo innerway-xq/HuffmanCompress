@@ -15,6 +15,7 @@ using std::string;
 ull word_freq[256] = {};
 const int MAX_IO_N = 0x1000;
 std::vector<string> files;
+std::vector<string> empty_folders;
 
 bool isFile(const char *path)
 {
@@ -45,7 +46,7 @@ string GetRootPath(string &src)
     string ret;
     for (int i = target_l - 1; i >= 0; --i)
     {
-        if (src[i] == '/')
+        if (src[i] == '/' || src[i] == '\\')
         {
             ret.assign(src).erase(i);
             return ret;
@@ -57,11 +58,13 @@ void GetFolderFiles(string root)
 {
     long file_handle;
     struct _finddata_t fileinfo;
+    int i = 0;
     string tmp;
     if ((file_handle = _findfirst(tmp.assign(root).append("/*").c_str(), &fileinfo)))
     {
         do
         {
+            ++i;
             if ((fileinfo.attrib & _A_SUBDIR))
             {
                 if ((strcmp(fileinfo.name, ".")) && (strcmp(fileinfo.name, "..")))
@@ -73,6 +76,9 @@ void GetFolderFiles(string root)
             }
         } while (!(_findnext(file_handle, &fileinfo)));
         _findclose(file_handle);
+    }
+    if(i == 2){
+        empty_folders.push_back(tmp.assign(root));
     }
 }
 

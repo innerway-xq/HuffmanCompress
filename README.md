@@ -18,6 +18,8 @@ else if (_S_IFREG & buf.st_mode) {
   >
   > https://blog.csdn.net/sagghab/article/details/81436515 - \_finddata_t
 
+- [ ] 解压用
+
   > access( )函数：用于文件读取，判断文件是否存在，并判断文件是否可写。Linux中，函数为access();标准C++中，该函数为_access，两者的使用方法基本相同
   >
   > access(const char *pathname, int mode);//位于<unistd.h>中
@@ -42,7 +44,7 @@ else if (_S_IFREG & buf.st_mode) {
 
 - [x] destfile 记下 编码后长度
 
-- [ ] 检测是否已经有压缩好的文件
+- [x] 检测是否已经有压缩好的文件
 
 - [ ] 逐行读取
 
@@ -57,7 +59,7 @@ else if (_S_IFREG & buf.st_mode) {
   }
   ```
 
-- [ ] 空文件夹处理
+- [x] 空文件夹处理
 
   特殊处理：
 
@@ -100,6 +102,7 @@ else if (_S_IFREG & buf.st_mode) {
 [number of empty folder]
 /...					# 空文件夹相对根文件夹路径
 ...
+[number of files]
 /[file_path]			# 相对根文件夹路径
 [压缩文件长度]			-
 # code2word				|

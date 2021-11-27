@@ -13,6 +13,7 @@ typedef std::map<std::string, uc> Code2Word_T;
 extern ull word_freq[256];
 extern const int MAX_IO_N;
 extern std::vector<std::string> files;
+extern std::vector<std::string> empty_folders;
 
 bool isFile(const char* path);
 int GetFileSize(const char* file_path);
