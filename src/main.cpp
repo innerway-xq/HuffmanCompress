@@ -105,7 +105,8 @@ void compress(const char *target)
         relative_addr.assign(target);
         relative_addr = "." + relative_addr.substr(GetRootPath(root).size()) + "\n";
         fout.write(relative_addr.c_str(), relative_addr.size());
-        if (empty_folders[0] == root)
+
+        if (!empty_folders.empty() && empty_folders[0] == root)
         {
             fout.write("0\n", 2);
         }
@@ -120,6 +121,7 @@ void compress(const char *target)
                 fout.write(i.c_str(), i.size());
             }
         }
+
         char file_num[25] = {};
         sprintf(file_num, "%d\n", files.size());
         fout.write(file_num, strlen(file_num));
@@ -137,16 +139,22 @@ void compress(const char *target)
 void decompress_file(ifstream &fin, const char *dest)
 {
     init_externs();
-
+    cout << "decompressing " << dest << endl;
     string src_l_tmp;
     ull src_l;
     getline(fin, src_l_tmp);
     src_l = strtoull(src_l_tmp.c_str(), nullptr, 10);
-
-    read_code2word(fin);
-    xqz_write_dest_decompress(fin, dest, src_l);
-
-    fin.close();
+    if(!src_l){
+        ofstream fout(dest,ios::out|ios::binary);
+        fout.close();
+        cout<<"decompress "<<dest<<"(empty file) finished"<<endl;
+    }
+    else
+    {
+        read_code2word(fin);
+        cout<<"read code2word finished"<<endl;
+        xqz_write_dest_decompress(fin, dest, src_l);
+    }
 }
 
 void decompress(const char *target)
@@ -169,7 +177,40 @@ void decompress(const char *target)
             return;
         }
         decompress_file(fin, buf_in.c_str());
+        fin.close();
+    }
+    else
+    {
+        string root = "";
+        string relative_addr = "";
+        string dest = "";
+        int empty_folder_num, file_num;
 
+        getline(fin, root);
+        if(dest_exist(root)){
+            cout << "decompressed folder exists" << endl;
+            return;
+        }
+        my_mkdir(root.c_str());
+        getline(fin, buf_in);
+        empty_folder_num = strtol(buf_in.c_str(), nullptr, 10);
+        for (int i = 0; i < empty_folder_num; ++i)
+        {
+            getline(fin, relative_addr);
+            dest = root + relative_addr;
+            my_mkdir(dest.c_str());
+        }
+
+        getline(fin, buf_in);
+        file_num = strtol(buf_in.c_str(), nullptr, 10);
+        for (int i = 0; i < file_num; ++i)
+        {
+            getline(fin, relative_addr);
+            dest = root + relative_addr;
+            my_mkdir(GetRootPath(dest).c_str());
+            decompress_file(fin, dest.c_str());
+        }
+        fin.close();
     }
 }
 
@@ -181,7 +222,7 @@ int main(int argc, char **argv)
     QueryPerformanceFrequency(&m_nFreq);    // 获取时钟周期
     QueryPerformanceCounter(&m_nBeginTime); // 获取时钟计数
 
-    char *target = (char *)"./sample/3.csv.xqz";
+    char *target = (char *)"./sample/3.xqz";
 
     if (target[strlen(target) - 1] == '/' or target[strlen(target) - 1] == '\\')
         target[strlen(target) - 1] = '\0';

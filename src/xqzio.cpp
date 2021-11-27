@@ -40,7 +40,7 @@ int GetFileSize(const char *file_path)
     return buf.st_size;
 }
 
-string GetRootPath(string &src)
+string GetRootPath(string src)
 {
     int target_l = src.size();
     string ret;
@@ -58,10 +58,11 @@ void GetFolderFiles(string root)
 {
     long file_handle;
     struct _finddata_t fileinfo;
-    int i = 0;
+
     string tmp;
     if ((file_handle = _findfirst(tmp.assign(root).append("/*").c_str(), &fileinfo)))
     {
+        int i = 0;
         do
         {
             ++i;
@@ -76,10 +77,10 @@ void GetFolderFiles(string root)
             }
         } while (!(_findnext(file_handle, &fileinfo)));
         _findclose(file_handle);
-    }
-    if (i == 2)
-    {
-        empty_folders.push_back(tmp.assign(root));
+        if (i == 2)
+        {
+            empty_folders.push_back(tmp.assign(root));
+        }
     }
 }
 
@@ -274,7 +275,8 @@ void read_code2word(ifstream &fin)
         string code_tmp = "";
         uc word_tmp;
         fin.read(&buf_in, 1);
-        if (buf_in == '*'){
+        if (buf_in == '*')
+        {
             fin.read(&buf_in, 1);
             return;
         }
@@ -301,32 +303,40 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l){
     int out_l = 0;
     ofstream fout;
     fout.open(dest, ios::out | ios::binary);
-    if(!fout){
-        cout<<"open destfile failed"<<endl;
+    if (!fout)
+    {
+        cout << "open destfile failed" << endl;
     }
 
-    ull src_bytes_l = src_l/8 + bool(src_l%8);
-    ull max_i,left_j;
+    ull src_bytes_l = src_l / 8 + bool(src_l % 8);
+    ull max_i, left_j;
     uc left_k;
-    left_k = ((uc)(0x80)>>(src_l%8))<<1;
-    if (!(src_bytes_l % MAX_IO_N)){
+    left_k = ((uc)(0x80) >> (src_l % 8)) << 1;
+    if (!(src_bytes_l % MAX_IO_N))
+    {
         max_i = src_bytes_l / MAX_IO_N - 1;
-        left_j = MAX_IO_N -1;
+        left_j = MAX_IO_N - 1;
     }
-    else{
+    else
+    {
         max_i = src_bytes_l / MAX_IO_N;
-        left_j = src_bytes_l%MAX_IO_N - 1;
+        left_j = src_bytes_l % MAX_IO_N - 1;
     }
-
-    for(register ull i = 0;i < max_i; ++i){
-        fin.read(buf_in,MAX_IO_N);
-        for(register int j = 0; j < MAX_IO_N; ++j){
-            for(register uc k = 0x80; k ; k>>=1){
-                buf_string += bool(buf_in[j]&k);
-                if(code2word.count(buf_string)){
-                    if(out_l>=MAX_IO_N){
-                        fout.write(buf_out,out_l);
-                        memset(buf_out,0,sizeof(buf_out));
+    cout << max_i << " " << left_j << " " << int(left_k) << endl;
+    for (register ull i = 0; i < max_i; ++i)
+    {
+        fin.read(buf_in, MAX_IO_N);
+        for (register int j = 0; j < MAX_IO_N; ++j)
+        {
+            for (register uc k = 0x80; k; k >>= 1)
+            {
+                buf_string += bool(buf_in[j] & k);
+                if (code2word.count(buf_string))
+                {
+                    if (out_l >= MAX_IO_N)
+                    {
+                        fout.write(buf_out, out_l);
+                        memset(buf_out, 0, sizeof(buf_out));
                         out_l = 0;
                     }
                     buf_out[out_l++] = code2word[buf_string];
@@ -355,27 +365,61 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l){
             }
         }
     }
-    fin.read(buf_in, 1);
-    for (register uc k = 0x80; k >= left_k; k >>= 1)
+    if (left_k)
     {
-        buf_string += bool(buf_in[0] & k);
-        if (code2word.count(buf_string))
+        fin.read(buf_in, 1);
+        for (register uc k = 0x80; k >= left_k; k >>= 1)
         {
-            if (out_l >= MAX_IO_N)
+            buf_string += bool(buf_in[0] & k);
+            if (code2word.count(buf_string))
             {
-                fout.write(buf_out, out_l);
-                memset(buf_out, 0, sizeof(buf_out));
-                out_l = 0;
+                if (out_l >= MAX_IO_N)
+                {
+                    fout.write(buf_out, out_l);
+                    memset(buf_out, 0, sizeof(buf_out));
+                    out_l = 0;
+                }
+                buf_out[out_l++] = code2word[buf_string];
+                buf_string = "";
             }
-            buf_out[out_l++] = code2word[buf_string];
-            buf_string = "";
         }
     }
-    if(out_l){
+    else
+    {
+        fin.read(buf_in, 1);
+        for (register uc k = 0x80; k; k >>= 1)
+        {
+            buf_string += bool(buf_in[0] & k);
+            if (code2word.count(buf_string))
+            {
+                if (out_l >= MAX_IO_N)
+                {
+                    fout.write(buf_out, out_l);
+                    memset(buf_out, 0, sizeof(buf_out));
+                    out_l = 0;
+                }
+                buf_out[out_l++] = code2word[buf_string];
+                buf_string = "";
+            }
+        }
+    }
+    if (out_l)
+    {
         fout.write(buf_out, out_l);
         memset(buf_out, 0, sizeof(buf_out));
         out_l = 0;
     }
     fout.close();
-    cout<<"decompress "<<dest<<" finished"<<endl;
+    fin.read(buf_in, 1);
+    cout << "decompress " << dest << " finished" << endl;
+}
+
+void my_mkdir(string path){
+    if(mkdir(path.c_str()) == 0){
+        return;
+    }
+    else{
+        my_mkdir(GetRootPath(path));
+        mkdir(path.c_str());
+    }
 }
