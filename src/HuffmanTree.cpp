@@ -20,42 +20,51 @@ HuffmanTreeNode::HuffmanTreeNode()
     lr = 0;
     idx = 0;
 }
+
 HuffmanTreeNode::HuffmanTreeNode(int v)
 {
     value = v;
     idx = nodes_num;
     idx2nodes.insert(pair<int, HuffmanTreeNode *>(nodes_num++, this));
 }
+
 HuffmanTreeNode::HuffmanTreeNode(int v, HuffmanTreeNode *real_addr)
 {
     value = v;
     idx = nodes_num;
     idx2nodes.insert(pair<int, HuffmanTreeNode *>(nodes_num++, real_addr));
 }
+
 bool HuffmanTreeNode::operator<(const HuffmanTreeNode &x) const
 {
     return value < x.value;
 }
+
 void HuffmanTreeNode::SetValue(int v)
 {
     value = v;
 }
+
 void HuffmanTreeNode::SetFather(HuffmanTreeNode *f)
 {
     father = f;
 }
+
 void HuffmanTreeNode::SetLR(char _lr)
 {
     lr = _lr;
 }
+
 int HuffmanTreeNode::GetValue()
 {
     return value;
 }
+
 char HuffmanTreeNode::GetLR()
 {
     return lr;
 }
+
 string HuffmanTreeNode::GenerateCode()
 {
     string ret = "";
@@ -82,27 +91,33 @@ HuffmanForest::HuffmanForest()
 {
     nodes = *new HuffmanForest_Queue;
 }
+
 bool HuffmanForest::is_Tree()
 {
     return nodes.size() == 1;
 }
+
 void HuffmanForest::AddNode(HuffmanTreeNode *x, uc word)
 {
     word2nodes_addr[word] = x;
     nodes.push(x->idx);
 }
+
 void HuffmanForest::Pop()
 {
     nodes.pop();
 }
+
 void HuffmanForest::Push(HuffmanTreeNode *x)
 {
     nodes.push(x->idx);
 }
+
 HuffmanTreeNode *HuffmanForest::Top()
 {
     return idx2nodes.at(nodes.top());
 }
+
 Word2Code_T HuffmanForest::GenerateWord2Code()
 {
     Word2Code_T temp;
@@ -117,6 +132,7 @@ Word2Code_T HuffmanForest::GenerateWord2Code()
     }
     return temp;
 }
+
 Code2Word_T HuffmanForest::GenerateCode2Word()
 {
     Word2Code_T temp1 = GenerateWord2Code();
@@ -138,6 +154,7 @@ HuffmanTreeNode *MergeHuffmanTree(HuffmanTreeNode *x, HuffmanTreeNode *y)
     y->SetLR(1);
     return ret;
 }
+
 void GenerateHuffmanTree(HuffmanForest *x)
 {
     while (!x->is_Tree())
@@ -149,6 +166,7 @@ void GenerateHuffmanTree(HuffmanForest *x)
         x->Push(MergeHuffmanTree(temp1, temp2));
     }
 }
+
 void Code2WordinFile(std::ofstream &fout)
 {
     char temp[10000] = {};

@@ -61,7 +61,17 @@ else if (_S_IFREG & buf.st_mode) {
 
 - [ ] 空文件夹处理
 
-- [ ] 注释
+  特殊处理：
+
+  用一个vector存下所有空文件夹，写在压缩文件的开头部分
+
+- [x] 注释
+
+- [ ] feature：把许多文件压缩成一个压缩文件
+
+- [ ] 中文文件名
+
+- [ ] 文件名中空格
 
 
 
@@ -77,3 +87,30 @@ else if (_S_IFREG & buf.st_mode) {
 + ull word_freq[256];
 + const int MAX_IO_N;
 + vector\<string> files
+
+## 压缩文件格式
+
+```
+[1 or 0]		# 1 - file; 0 - folder
+############# if file ################
+./[file_name]
+[压缩文件长度]
+# code2word
+[code]:[word]
+...
+[compressed file]
+############# if folder ##############
+./[folder_name]
+[number of empty folder]
+/...					# 空文件夹相对根文件夹路径
+...
+/[file_path]			# 相对根文件夹路径
+[压缩文件长度]			-
+# code2word				|
+[code]:[word]			|
+...						|
+[compressed file]		-
+...
+
+```
+

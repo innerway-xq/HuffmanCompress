@@ -16,11 +16,17 @@ extern std::vector<std::string> files;
 
 bool isFile(const char* path);
 int GetFileSize(const char* file_path);
+// GetRootPath - 得到根目录
 std::string GetRootPath(std::string &src);
+// GetFolderFiles - 得到root下所有文件，存在files里
 void GetFolderFiles(std::string root);
+// xqz_read_src - 读文件，并计数得到word_freq
 void xqz_read_src(const char *filename);
+// cnt_freq - 对x中字符计数
 void cnt_freq(uc *x, int l);
-ull cnt_code_bytes();
+// compressed_length - 压缩文件长度
+ull compressed_length();
+// xqz_write_dest - 写入dest文件
 void xqz_write_dest(const char *srcfilename,const char *relative_addr, const char *destfilename);
 
 #endif

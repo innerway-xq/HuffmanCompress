@@ -31,6 +31,7 @@ bool isFile(const char *path)
         return true;
     }
 }
+
 int GetFileSize(const char *file_path)
 {
     struct stat buf;
@@ -99,6 +100,7 @@ void xqz_read_src(const char *filename)
     fin.close();
     cout << filename << " input finished" << endl;
 }
+
 void cnt_freq(uc *x, int l)
 {
     for (register int i = 0; i < l; ++i)
@@ -106,7 +108,8 @@ void cnt_freq(uc *x, int l)
         ++word_freq[x[i]];
     }
 }
-ull cnt_code_bytes()
+
+ull compressed_length()
 {
     ull ret;
     for (int i = 0; i < 256; ++i)
@@ -115,6 +118,7 @@ ull cnt_code_bytes()
     }
     return ret;
 }
+
 void xqz_write_dest(const char *srcfilename, const char *relative_addr, const char *destfilename)
 {
     uc buf_out[MAX_IO_N] = {};
@@ -125,12 +129,14 @@ void xqz_write_dest(const char *srcfilename, const char *relative_addr, const ch
         cout << "open destfile failed" << endl;
         return;
     }
+
     fout.write(relative_addr, strlen(relative_addr));
     fout.write("\n", 1);
     char dest_length[25] = {};
-    sprintf(dest_length,"%llu", cnt_code_bytes());
+    sprintf(dest_length, "%llu", compressed_length());
     fout.write(dest_length, strlen(dest_length));
     fout.write("\n", 1);
+
     Code2WordinFile(fout);
 
     uc buf_in[MAX_IO_N] = {};

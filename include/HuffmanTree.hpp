@@ -12,6 +12,7 @@
 
 typedef std::map<uc, std::string> Word2Code_T;
 typedef std::map<std::string, uc> Code2Word_T;
+
 extern int nodes_num;
 extern Word2Code_T word2code;
 extern Code2Word_T code2word;
@@ -33,7 +34,8 @@ public:
     void SetLR(char _lr);
     int GetValue();
     char GetLR();
-    std::string GenerateCode();
+    // GenerateCode - 从此节点向上生成01序列，仅用于叶节点
+    std::string GenerateCode(); 
 };
 
 extern std::map<int, HuffmanTreeNode *> idx2nodes;
@@ -52,7 +54,9 @@ private:
 
 public:
     HuffmanForest();
+    // is_Tree - 是否是一棵树，即是否生成完毕
     bool is_Tree();
+    // AddNode - 用于添加初始节点（叶节点）
     void AddNode(HuffmanTreeNode *x, uc word);
     void Pop();
     HuffmanTreeNode *Top();
@@ -61,8 +65,11 @@ public:
     Code2Word_T GenerateCode2Word();
 };
 
+// MergeHuffmanTree - 合并两个节点
 HuffmanTreeNode *MergeHuffmanTree(HuffmanTreeNode *x, HuffmanTreeNode *y);
+// GenerateHuffmanTree - 生成哈夫曼树
 void GenerateHuffmanTree(HuffmanForest *x);
+// Code2WordinFile - 将code2word写入压缩文件
 void Code2WordinFile(std::ofstream &fout);
 
 #endif
