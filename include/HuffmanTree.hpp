@@ -69,7 +69,6 @@ public:
 HuffmanTreeNode *MergeHuffmanTree(HuffmanTreeNode *x, HuffmanTreeNode *y);
 // GenerateHuffmanTree - 生成哈夫曼树
 void GenerateHuffmanTree(HuffmanForest *x);
-// Code2WordinFile - 将code2word写入压缩文件
-void Code2WordinFile(std::ofstream &fout);
+
 
 #endif

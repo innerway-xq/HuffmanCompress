@@ -46,6 +46,8 @@ else if (_S_IFREG & buf.st_mode) {
 
 - [x] 检测是否已经有压缩好的文件
 
+- [ ] 检测是否已经有解压过的文件
+
 - [ ] 逐行读取
 
   ```cpp
@@ -85,6 +87,7 @@ else if (_S_IFREG & buf.st_mode) {
 + ull word_freq[256];
 + const int MAX_IO_N;
 + vector\<string> files
++ vector\<string> empty_folders
 
 ## 压缩文件格式
 

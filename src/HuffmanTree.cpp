@@ -167,31 +167,4 @@ void GenerateHuffmanTree(HuffmanForest *x)
     }
 }
 
-void Code2WordinFile(std::ofstream &fout)
-{
-    char temp[10000] = {};
-    int l = 0;
-    Code2Word_T::iterator it;
-    string::iterator i;
-    for (it = code2word.begin(); it != code2word.end(); ++it)
-    {
-        string tmp_str = it->first;
-        for (i = (tmp_str).begin(); i != (tmp_str).end(); ++i)
-        {
-            if (*i)
-            {
-                temp[l++] = '1';
-            }
-            else
-            {
-                temp[l++] = '0';
-            }
-        }
-        temp[l++] = ':';
-        temp[l++] = it->second;
-        temp[l++] = '\n';
-    }
-    temp[l++] = '*';
-    temp[l++] = '\n';
-    fout.write(temp, l);
-}
+

@@ -21,13 +21,19 @@ int GetFileSize(const char* file_path);
 std::string GetRootPath(std::string &src);
 // GetFolderFiles - 得到root下所有文件，存在files里
 void GetFolderFiles(std::string root);
-// xqz_read_src - 读文件，并计数得到word_freq
-void xqz_read_src(const char *filename);
+// xqz_read_src_compress - 读文件，并计数得到word_freq
+void xqz_read_src_compress(const char *filename);
 // cnt_freq - 对x中字符计数
 void cnt_freq(uc *x, int l);
-// compressed_length - 压缩文件长度
+// compressed_length - 压缩文件长度(按bit)
 ull compressed_length();
-// xqz_write_dest - 写入dest文件
-void xqz_write_dest(const char *srcfilename,const char *relative_addr, const char *destfilename);
+// Code2WordinFile - 将code2word写入压缩文件
+void Code2WordinFile(std::ofstream &fout);
+// xqz_write_dest_compress - 读入src文件，压缩后，写入dest文件
+void xqz_write_dest_compress(const char *srcfilename,const char *relative_addr, const char *destfilename);
+// read_code2word - 从压缩文件读取code2word
+void read_code2word(std::ifstream &fin);
+// xqz_write_dest_decompress - 读入fin流，解压后，写入dest文件 
+void xqz_write_dest_decompress(std::ifstream &fin, const char* dest, ull src_l);
 
 #endif

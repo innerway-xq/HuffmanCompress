@@ -1,6 +1,6 @@
 VPATH = src
 objects = main.o HuffmanTree.o xqzio.o
-target = HuffmanCompress.exe
+target = xqz.exe
 
 $(target) : $(objects)
 	g++ $^ -o $@ -Iinclude

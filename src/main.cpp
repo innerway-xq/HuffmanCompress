@@ -17,6 +17,20 @@ void init_externs()
     memset(word2nodes_addr, 0, sizeof(word2nodes_addr));
     memset(word_freq, 0, sizeof(word_freq));
 }
+
+bool dest_exist(string dest)
+{
+    int x = access(dest.c_str(), 0);
+    if (x == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void compress_file(const char *src, string relative_addr, string dest)
 {
     if (!GetFileSize(src))
@@ -29,7 +43,7 @@ void compress_file(const char *src, string relative_addr, string dest)
         return;
     }
     init_externs();
-    xqz_read_src(src);
+    xqz_read_src_compress(src);
     HuffmanForest *tree = new HuffmanForest;
     HuffmanTreeNode *nodes_array = new HuffmanTreeNode[256];
     for (int i = 0; i < 256; ++i)
@@ -45,35 +59,11 @@ void compress_file(const char *src, string relative_addr, string dest)
     word2code = tree->GenerateWord2Code();
     code2word = tree->GenerateCode2Word();
     // testword2code(word2code);
-    xqz_write_dest(src, relative_addr.c_str(), dest.c_str());
+    xqz_write_dest_compress(src, relative_addr.c_str(), dest.c_str());
 }
 
-bool dest_exist(string dest)
+void compress(const char *target)
 {
-    int x = access(dest.c_str(), 0);
-    if (x == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-int main(int argc, char **argv)
-{
-    LARGE_INTEGER m_nFreq;
-    LARGE_INTEGER m_nBeginTime;
-    LARGE_INTEGER nEndTime;
-    QueryPerformanceFrequency(&m_nFreq);    // 获取时钟周期
-    QueryPerformanceCounter(&m_nBeginTime); // 获取时钟计数
-
-    char *target = (char *)"./sample/emptyfolders";
-
-    if (target[strlen(target) - 1] == '/')
-        target[strlen(target) - 1] = '\0';
-
     if (isFile(target))
     {
         string root = "";          //根目录
@@ -84,14 +74,10 @@ int main(int argc, char **argv)
         relative_addr.assign(target);
         relative_addr = "." + relative_addr.substr(root.size());
         dest.assign(target).append(".xqz");
-        cout << "root:" << root << endl
-             << "rela:" << relative_addr << endl
-             << "dest:" << dest << endl;
         if (dest_exist(dest))
         {
             cout << "compressed file exists" << endl;
-            sp;
-            return 0;
+            return;
         }
 
         ofstream fout(dest, ios::app | ios::binary);
@@ -111,8 +97,7 @@ int main(int argc, char **argv)
         if (dest_exist(dest))
         {
             cout << "compressed file exists" << endl;
-            sp;
-            return 0;
+            return;
         }
 
         ofstream fout(dest, ios::app | ios::binary);
@@ -120,16 +105,19 @@ int main(int argc, char **argv)
         relative_addr.assign(target);
         relative_addr = "." + relative_addr.substr(GetRootPath(root).size()) + "\n";
         fout.write(relative_addr.c_str(), relative_addr.size());
-        if(empty_folders[0] == root){
+        if (empty_folders[0] == root)
+        {
             fout.write("0\n", 2);
         }
-        else{
-            char empty_folder_num[25]={};
+        else
+        {
+            char empty_folder_num[25] = {};
             sprintf(empty_folder_num, "%d\n", empty_folders.size());
-            fout.write(empty_folder_num,strlen(empty_folder_num));
-            for(string i : empty_folders){
+            fout.write(empty_folder_num, strlen(empty_folder_num));
+            for (string i : empty_folders)
+            {
                 i = i.substr(GetRootPath(i).size()) + "\n";
-                fout.write(i.c_str(),i.size());
+                fout.write(i.c_str(), i.size());
             }
         }
         char file_num[25] = {};
@@ -144,6 +132,61 @@ int main(int argc, char **argv)
             compress_file(i.c_str(), relative_addr, dest);
         }
     }
+}
+
+void decompress_file(ifstream &fin, const char *dest)
+{
+    init_externs();
+
+    string src_l_tmp;
+    ull src_l;
+    getline(fin, src_l_tmp);
+    src_l = strtoull(src_l_tmp.c_str(), nullptr, 10);
+
+    read_code2word(fin);
+    xqz_write_dest_decompress(fin, dest, src_l);
+
+    fin.close();
+}
+
+void decompress(const char *target)
+{
+    string buf_in;
+    ifstream fin;
+    fin.open(target, ios::in | ios::binary);
+    if (!fin)
+    {
+        cout << "open " << target << " failed" << endl;
+    }
+
+    getline(fin, buf_in);
+    if (buf_in == "1")
+    {
+        getline(fin, buf_in);
+        if (dest_exist(buf_in.c_str()))
+        {
+            cout << "decompressed file exists" << endl;
+            return;
+        }
+        decompress_file(fin, buf_in.c_str());
+
+    }
+}
+
+int main(int argc, char **argv)
+{
+    LARGE_INTEGER m_nFreq;
+    LARGE_INTEGER m_nBeginTime;
+    LARGE_INTEGER nEndTime;
+    QueryPerformanceFrequency(&m_nFreq);    // 获取时钟周期
+    QueryPerformanceCounter(&m_nBeginTime); // 获取时钟计数
+
+    char *target = (char *)"./sample/3.csv.xqz";
+
+    if (target[strlen(target) - 1] == '/' or target[strlen(target) - 1] == '\\')
+        target[strlen(target) - 1] = '\0';
+
+    decompress(target);
 
     QueryPerformanceCounter(&nEndTime);
     std::cout << (double)(nEndTime.QuadPart - m_nBeginTime.QuadPart) * 1000 / m_nFreq.QuadPart << "ms" << std::endl;
