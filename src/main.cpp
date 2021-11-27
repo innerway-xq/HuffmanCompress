@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     QueryPerformanceFrequency(&m_nFreq);    // 获取时钟周期
     QueryPerformanceCounter(&m_nBeginTime); // 获取时钟计数
 
-    char *target = (char *)"./sample/3";
+    char *target = (char *)"./sample/test1";
 
     if (target[strlen(target) - 1] == '/')
         target[strlen(target) - 1] = '\0';
@@ -74,9 +74,11 @@ int main(int argc, char **argv)
         cout << "root:" << root << endl
              << "rela:" << relative_addr << endl
              << "dest:" << dest << endl;
+
         ofstream fout(dest,ios::app|ios::binary);
         fout.write("1\n",2);
         fout.close();
+        
         compress_file(target, relative_addr, dest);
     }
     else

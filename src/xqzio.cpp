@@ -111,7 +111,7 @@ void cnt_freq(uc *x, int l)
 
 ull compressed_length()
 {
-    ull ret;
+    ull ret = 0;
     for (int i = 0; i < 256; ++i)
     {
         ret += word_freq[i] * word2code[(uc)i].size();
@@ -171,14 +171,11 @@ void xqz_write_dest(const char *srcfilename, const char *relative_addr, const ch
                     {
                         fout.write((const char *)buf_out, out_l);
                         memset(buf_out, 0, sizeof(buf_out));
-                        out_l &= 0;
+                        out_l = 0;
                     }
-                    else
-                    {
-                        buf_out[out_l++] = buf_char;
-                        buf_char <<= 8;
-                        buf_bit = 7;
-                    }
+                    buf_out[out_l++] = buf_char;
+                    buf_char <<= 8;
+                    buf_bit = 7;
                 }
                 buf_char |= temp[k] << (buf_bit--);
             }
@@ -197,33 +194,27 @@ void xqz_write_dest(const char *srcfilename, const char *relative_addr, const ch
                 {
                     fout.write((const char *)buf_out, out_l);
                     memset(buf_out, 0, sizeof(buf_out));
-                    out_l &= 0;
+                    out_l = 0;
                 }
-                else
-                {
-                    buf_out[out_l++] = buf_char;
-                    buf_char <<= 8;
-                    buf_bit = 7;
-                }
+                buf_out[out_l++] = buf_char;
+                buf_char <<= 8;
+                buf_bit = 7;
             }
             buf_char |= temp[k] << (buf_bit--);
         }
     }
 
-    if (buf_char)
+    if (buf_bit < 7)
     {
         if (out_l >= MAX_IO_N)
         {
             fout.write((const char *)buf_out, out_l);
             memset(buf_out, 0, sizeof(buf_out));
-            out_l &= 0;
+            out_l = 0;
         }
-        else
-        {
-            buf_out[out_l++] = buf_char;
-            buf_char <<= 8;
-            //这里的buf_bit即为压缩文件末尾多的零，要记下来
-        }
+        buf_out[out_l++] = buf_char;
+        buf_char <<= 8;
+        //此时buf_bit即为压缩文件末尾多的零
     }
     if (out_l)
     {
