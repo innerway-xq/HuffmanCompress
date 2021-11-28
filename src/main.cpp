@@ -1,8 +1,9 @@
 #include "HuffmanTree.hpp"
 #include "xqzio.hpp"
 #include "xq_debug.hpp"
+#include "cxxopts.hpp"
 #include <iostream>
-#include <cstring>
+#include <fstream>
 #include <windows.h>
 #include <direct.h>
 

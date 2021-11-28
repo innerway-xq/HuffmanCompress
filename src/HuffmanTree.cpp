@@ -1,9 +1,4 @@
 #include "HuffmanTree.hpp"
-#include <utility>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <cstring>
 using std::pair;
 using std::string;
 

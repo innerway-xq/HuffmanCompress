@@ -36,5 +36,5 @@ void read_code2word(std::ifstream &fin);
 // xqz_write_dest_decompress - 读入fin流，解压后，写入dest文件 
 void xqz_write_dest_decompress(std::ifstream &fin, const char* dest, ull src_l);
 // my_mkdir - 创建多级目录
-void my_mkdir(string path);
+void my_mkdir(std::string path);
 #endif

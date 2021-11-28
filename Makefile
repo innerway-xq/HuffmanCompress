@@ -1,13 +1,15 @@
-VPATH = src
+VPATH = src:include
 objects = main.o HuffmanTree.o xqzio.o
+cxxopts = cxxopts.hpp
 target = xqz.exe
 
-$(target) : $(objects)
+$(target) : $(objects) $(cxxopts)
 	g++ $^ -o $@ -Iinclude
-	del $^
+	del $(objects)
 
 $(objects) : %.o : %.cpp
-	g++ -c $? -o $@ -Iinclude -O2
+	g++ -c $? -o $@ -Iinclude -O2 -w
+
 
 .PHONY : clean
 clean :
