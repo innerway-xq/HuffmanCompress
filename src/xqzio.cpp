@@ -100,14 +100,16 @@ void xqz_read_src_compress(const char *filename)
     fin.seekg(0, ios::beg);
     for (register ull i = 1; i <= max_i; ++i)
     {
-        update_bar(i,max_i);
+        // update_bar(i, max_i);
         fin.read((char *)buf, MAX_IO_N);
         cnt_freq(buf, MAX_IO_N);
     }
     fin.read((char *)buf, length % MAX_IO_N);
     cnt_freq(buf, length % MAX_IO_N);
     fin.close();
-    cout <<endl<< filename << " input finished" << endl;
+    // update_bar(max_i,max_i);
+    cout << endl
+         << filename << " input finished" << endl;
 }
 
 void cnt_freq(uc *x, int l)
@@ -159,6 +161,7 @@ void Code2WordinFile(std::ofstream &fout)
 
 void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr, const char *destfilename)
 {
+    cout << "writing " << destfilename << endl;
     uc buf_out[MAX_IO_N] = {};
     ofstream fout;
     fout.open(destfilename, ios::app | ios::binary);
@@ -198,7 +201,8 @@ void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr,
 
     for (register ull i = 1; i <= max_i; ++i)
     {
-        update_bar(i,max_i);
+        if (max_i)
+            update_bar(i, max_i);
         fin.read((char *)buf_in, MAX_IO_N);
         for (register int j = 0; j < MAX_IO_N; ++j)
         {
@@ -266,7 +270,10 @@ void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr,
     fout.write("\n", 1);
     fin.close();
     fout.close();
-    cout <<endl<< srcfilename << " compress finished" << endl;
+    if (max_i)
+        update_bar(max_i, max_i);
+    cout << endl
+         << srcfilename << " compress finished" << endl;
 }
 
 void read_code2word(ifstream &fin)
@@ -297,7 +304,8 @@ void read_code2word(ifstream &fin)
     }
 }
 
-void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l){
+void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
+{
     char buf_in[MAX_IO_N] = {};
     string buf_string = "";
 
@@ -326,7 +334,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l){
     }
     for (register ull i = 0; i < max_i; ++i)
     {
-        update_bar(i,max_i);
+        if (max_i)
+            update_bar(i, max_i);
         fin.read(buf_in, MAX_IO_N);
         for (register int j = 0; j < MAX_IO_N; ++j)
         {
@@ -413,7 +422,10 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l){
     }
     fout.close();
     fin.read(buf_in, 1);
-    cout <<endl<< "decompress " << dest << " finished" << endl;
+    if (max_i)
+        update_bar(max_i, max_i);
+    cout << endl
+         << "decompress " << dest << " finished" << endl;
 }
 
 bool dest_exist(string dest)
@@ -429,32 +441,41 @@ bool dest_exist(string dest)
     }
 }
 
-void my_mkdir(string path){
-    if(dest_exist(path) || mkdir(path.c_str()) == 0){
+void my_mkdir(string path)
+{
+    if (dest_exist(path) || mkdir(path.c_str()) == 0)
+    {
         return;
     }
-    else{
-        cout << mkdir(path.c_str()) << endl;
+    else
+    {
         my_mkdir(GetRootPath(path));
         mkdir(path.c_str());
     }
 }
-void update_bar(int i,int max_i){
-    if(i % (max_i/BAR_WIDTH)) return;
+void update_bar(int i, int max_i)
+{
+    if (max_i < BAR_WIDTH)
+    {
+        i *= 0x1000;
+        max_i *= 0x1000;
+    }
+    if (i % (max_i / BAR_WIDTH) && i != max_i)
+        return;
     char a[4] = {'|', '/', '-', '\\'};
     int j;
     cout << a[(i * BAR_WIDTH / max_i) % 4];
     cout << "[";
     for (j = 0; j < i * BAR_WIDTH / max_i; j++)
-    {                                                                                                          //控制加载进度的显示
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | BACKGROUND_INTENSITY); //设置加载条样式配置
-        cout << "_";
+    {                                                                                                                                                                        //控制加载进度的显示
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED); //设置加载条样式配置
+        cout << " ";
     }
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
     for (j = 0; j < (BAR_WIDTH - (i * BAR_WIDTH / max_i)); j++)
     {
         printf("%c", '.');
-    }                                      
+    }
     cout << "] ";
     cout << "(" << i << "/" << max_i << ")";
     for (j = 0; j < (4 - i % 4); j++)

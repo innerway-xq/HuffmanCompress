@@ -5,6 +5,7 @@ target = xqz.exe
 
 $(target) : $(objects) $(cxxopts)
 	g++ $^ -o $@ -Iinclude
+	@move $(target) ./bin
 	del $(objects)
 
 $(objects) : %.o : %.cpp

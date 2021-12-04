@@ -83,6 +83,10 @@ else if (_S_IFREG & buf.st_mode) {
 
 - [x] trycatch
 
+- [x] 进度条
+
+  > https://www.cnblogs.com/seafever/p/12345200.html
+
 
 
 
