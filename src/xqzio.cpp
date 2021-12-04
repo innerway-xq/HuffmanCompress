@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstring>
 #include <sys/stat.h>
+#include <windows.h>
 
 using std::cout;
 using std::endl;
@@ -14,6 +15,7 @@ using std::string;
 
 ull word_freq[256] = {};
 const int MAX_IO_N = 0x1000;
+const int BAR_WIDTH = 70;
 std::vector<string> files;
 std::vector<string> empty_folders;
 
@@ -23,12 +25,10 @@ bool isFile(const char *path)
     stat(path, &buf);
     if (_S_IFDIR & buf.st_mode)
     {
-        cout << "folder" << endl;
         return false;
     }
     else if (_S_IFREG & buf.st_mode)
     {
-        cout << "file" << endl;
         return true;
     }
 }
@@ -60,7 +60,7 @@ void GetFolderFiles(string root)
     struct _finddata_t fileinfo;
 
     string tmp;
-    if ((file_handle = _findfirst(tmp.assign(root).append("/*").c_str(), &fileinfo)))
+    if ((file_handle = _findfirst(tmp.assign(root).append("\\*").c_str(), &fileinfo)))
     {
         int i = 0;
         do
@@ -69,11 +69,11 @@ void GetFolderFiles(string root)
             if ((fileinfo.attrib & _A_SUBDIR))
             {
                 if ((strcmp(fileinfo.name, ".")) && (strcmp(fileinfo.name, "..")))
-                    GetFolderFiles(tmp.assign(root).append("/").append(fileinfo.name));
+                    GetFolderFiles(tmp.assign(root).append("\\").append(fileinfo.name));
             }
             else
             {
-                files.push_back(tmp.assign(root).append("/").append(fileinfo.name));
+                files.push_back(tmp.assign(root).append("\\").append(fileinfo.name));
             }
         } while (!(_findnext(file_handle, &fileinfo)));
         _findclose(file_handle);
@@ -100,13 +100,14 @@ void xqz_read_src_compress(const char *filename)
     fin.seekg(0, ios::beg);
     for (register ull i = 1; i <= max_i; ++i)
     {
+        update_bar(i,max_i);
         fin.read((char *)buf, MAX_IO_N);
         cnt_freq(buf, MAX_IO_N);
     }
     fin.read((char *)buf, length % MAX_IO_N);
     cnt_freq(buf, length % MAX_IO_N);
     fin.close();
-    cout << filename << " input finished" << endl;
+    cout <<endl<< filename << " input finished" << endl;
 }
 
 void cnt_freq(uc *x, int l)
@@ -197,6 +198,7 @@ void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr,
 
     for (register ull i = 1; i <= max_i; ++i)
     {
+        update_bar(i,max_i);
         fin.read((char *)buf_in, MAX_IO_N);
         for (register int j = 0; j < MAX_IO_N; ++j)
         {
@@ -264,7 +266,7 @@ void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr,
     fout.write("\n", 1);
     fin.close();
     fout.close();
-    cout << srcfilename << " compress finished" << endl;
+    cout <<endl<< srcfilename << " compress finished" << endl;
 }
 
 void read_code2word(ifstream &fin)
@@ -322,9 +324,9 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l){
         max_i = src_bytes_l / MAX_IO_N;
         left_j = src_bytes_l % MAX_IO_N - 1;
     }
-    cout << max_i << " " << left_j << " " << int(left_k) << endl;
     for (register ull i = 0; i < max_i; ++i)
     {
+        update_bar(i,max_i);
         fin.read(buf_in, MAX_IO_N);
         for (register int j = 0; j < MAX_IO_N; ++j)
         {
@@ -411,15 +413,53 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l){
     }
     fout.close();
     fin.read(buf_in, 1);
-    cout << "decompress " << dest << " finished" << endl;
+    cout <<endl<< "decompress " << dest << " finished" << endl;
+}
+
+bool dest_exist(string dest)
+{
+    int x = access(dest.c_str(), 0);
+    if (x == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void my_mkdir(string path){
-    if(mkdir(path.c_str()) == 0){
+    if(dest_exist(path) || mkdir(path.c_str()) == 0){
         return;
     }
     else{
+        cout << mkdir(path.c_str()) << endl;
         my_mkdir(GetRootPath(path));
         mkdir(path.c_str());
     }
+}
+void update_bar(int i,int max_i){
+    if(i % (max_i/BAR_WIDTH)) return;
+    char a[4] = {'|', '/', '-', '\\'};
+    int j;
+    cout << a[(i * BAR_WIDTH / max_i) % 4];
+    cout << "[";
+    for (j = 0; j < i * BAR_WIDTH / max_i; j++)
+    {                                                                                                          //控制加载进度的显示
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | BACKGROUND_INTENSITY); //设置加载条样式配置
+        cout << "_";
+    }
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY);
+    for (j = 0; j < (BAR_WIDTH - (i * BAR_WIDTH / max_i)); j++)
+    {
+        printf("%c", '.');
+    }                                      
+    cout << "] ";
+    cout << "(" << i << "/" << max_i << ")";
+    for (j = 0; j < (4 - i % 4); j++)
+    {
+        printf("%c", ' ');
+    }
+    putchar('\r'); //回车
 }

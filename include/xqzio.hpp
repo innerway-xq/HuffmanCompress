@@ -35,6 +35,10 @@ void xqz_write_dest_compress(const char *srcfilename,const char *relative_addr, 
 void read_code2word(std::ifstream &fin);
 // xqz_write_dest_decompress - 读入fin流，解压后，写入dest文件 
 void xqz_write_dest_decompress(std::ifstream &fin, const char* dest, ull src_l);
+// dest_exist - 检查目标文件是否存在
+bool dest_exist(std::string dest);
 // my_mkdir - 创建多级目录
 void my_mkdir(std::string path);
+// update_bar - 更新进度条
+void update_bar(int i, int max_i);
 #endif

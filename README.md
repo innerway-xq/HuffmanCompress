@@ -12,13 +12,13 @@ else if (_S_IFREG & buf.st_mode) {
     printf("file\n");
 }
 ```
-- [ ] 获取文件夹下文件目录
+- [x] 获取文件夹下文件目录
 
   > https://blog.csdn.net/leo_888/article/details/80681184
   >
   > https://blog.csdn.net/sagghab/article/details/81436515 - \_finddata_t
 
-- [ ] 解压用
+- [x] 解压用
 
   > access( )函数：用于文件读取，判断文件是否存在，并判断文件是否可写。Linux中，函数为access();标准C++中，该函数为_access，两者的使用方法基本相同
   >
@@ -46,9 +46,9 @@ else if (_S_IFREG & buf.st_mode) {
 
 - [x] 检测是否已经有压缩好的文件
 
-- [ ] 检测是否已经有解压过的文件
+- [x] 检测是否已经有解压过的文件
 
-- [ ] 逐行读取
+- [x] 逐行读取
 
   ```cpp
   ifstream fin;
@@ -69,17 +69,19 @@ else if (_S_IFREG & buf.st_mode) {
 
 - [x] 注释
 
-- [ ] feature：把许多文件压缩成一个压缩文件
+- [x] feature：把许多文件压缩成一个压缩文件
 
-- [ ] feature：选项-是否套文件夹
+- [x] feature：选项-是否套文件夹
 
 - [x] 文件名中空格
 
-- [ ] 解压出来的文件夹权限很奇怪
+- [x] 解压出来的文件夹权限很奇怪
 
-- [ ] 创建多级目录
+- [x] 创建多级目录
 
-- [ ] 用户交互
+- [x] 用户交互
+
+- [x] trycatch
 
 
 
