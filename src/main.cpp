@@ -2,6 +2,7 @@
 #include "xqzio.hpp"
 #include "xq_debug.hpp"
 #include "cxxopts.hpp"
+#include "fnode.hpp"
 #include <iostream>
 #include <fstream>
 #include <windows.h>
@@ -21,7 +22,7 @@ void init_externs()
 
 void compress_file(const char *src, string relative_addr, string dest)
 {
-    cout<<"compressing "<<src<<endl;
+    cout << "compressing " << src << endl;
     if (!GetFileSize(src))
     {
         ofstream fout;
@@ -53,8 +54,9 @@ void compress_file(const char *src, string relative_addr, string dest)
 
 void compress(const char *target)
 {
-    if(!dest_exist(target)){
-        cout<<"no such file!"<<endl;
+    if (!dest_exist(target))
+    {
+        cout << "no such file!" << endl;
         return;
     }
     if (isFile(target))
@@ -188,7 +190,7 @@ void compress(const char *target, const char *dest_directory)
             fout.write(empty_folder_num, strlen(empty_folder_num));
             for (string i : empty_folders)
             {
-                i = i.substr(GetRootPath(i).size()) + "\n";
+                i = i.substr(root.size()) + "\n";
                 fout.write(i.c_str(), i.size());
             }
         }
@@ -364,7 +366,7 @@ void decompress(const char *target, const char *dest_directory)
     }
 }
 
-cxxopts::Options options("xqz", "");
+cxxopts::Options options("xqz", " - huffman compress by xq");
 void init_options()
 {
     options
@@ -391,6 +393,117 @@ void parse_path(char *x)
     return;
 }
 
+void show(char *target)
+{
+    parse_path(target);
+    if (target[strlen(target) - 4] != '.' || target[strlen(target) - 3] != 'x' || target[strlen(target) - 2] != 'q' || target[strlen(target) - 1] != 'z')
+    {
+        cout<<"not .xqz file"<<endl;
+        return;
+    }
+    ifstream fin(target, ios::binary | ios::in);
+    if (!fin)
+    {
+        cout << "open " << target << " failed" << endl;
+        return;
+    }
+    string buf;
+    getline(fin, buf);
+    if (buf == "1")
+    {
+        getline(fin, buf);
+        cout << buf.substr(2) << endl;
+        return;
+    }
+    else
+    {
+        getline(fin, buf);
+        FNode *root = new FNode(buf.substr(2), 0);
+
+        getline(fin, buf);
+        int empty_folder_num = strtol(buf.c_str(), nullptr, 10);
+        for (int i = 0; i < empty_folder_num; ++i)
+        {
+            getline(fin, buf);
+            FNode *pre = root;
+            string tmp = "";
+            buf.erase(0, 1);
+            for (int j = 0; j < buf.size(); ++j)
+            {
+                if (buf[j] == '\\')
+                {
+                    if (!pre->findChild(tmp))
+                    {
+                        FNode *folder_tmp = new FNode(tmp, 0);
+                        pre->addChild(folder_tmp);
+                    }
+                    pre = pre->findChild(tmp);
+                    tmp = "";
+                }
+                else if ((j + 1) == buf.size())
+                {
+                    tmp += buf[j];
+                    if (!pre->findChild(tmp))
+                    {
+                        FNode *folder_tmp = new FNode(tmp, 0);
+                        pre->addChild(folder_tmp);
+                    }
+                }
+                else
+                {
+                    tmp += buf[j];
+                }
+            }
+        }
+
+        getline(fin, buf);
+        int file_num = strtol(buf.c_str(), nullptr, 10);
+        for (int i = 0; i < file_num; ++i)
+        {
+            getline(fin, buf);
+            FNode *pre = root;
+            string tmp = "";
+            buf.erase(0, 1);
+            for (int j = 0; j < buf.size(); ++j)
+            {
+                if (buf[j] == '\\')
+                {
+                    if (!pre->findChild(tmp))
+                    {
+                        FNode *folder_tmp = new FNode(tmp, 0);
+                        pre->addChild(folder_tmp);
+                    }
+                    pre = pre->findChild(tmp);
+                    tmp = "";
+                }
+                else if ((j + 1) == buf.size())
+                {
+                    tmp += buf[j];
+                    FNode *file_tmp = new FNode(tmp, 1);
+                    pre->addChild(file_tmp);
+                }
+                else
+                {
+                    tmp += buf[j];
+                }
+            }
+
+            getline(fin, buf);
+            int file_size = strtol(buf.c_str(), nullptr, 10);
+            if(!file_size){
+                continue;
+            }
+            int file_size_byte = file_size / 8 + bool(file_size % 8);
+            for(;;){
+                getline(fin,buf);
+                if(buf == "*") break;
+            } 
+            fin.seekg(file_size_byte + 1, ios::cur);
+        }
+        root->printDirTree(0);
+    }
+}
+
 int main(int argc, char **argv)
 {
     LARGE_INTEGER m_nFreq;
@@ -399,6 +512,11 @@ int main(int argc, char **argv)
     QueryPerformanceFrequency(&m_nFreq);    // 获取时钟周期
     QueryPerformanceCounter(&m_nBeginTime); // 获取时钟计数
 
+    if (argc == 1)
+    {
+        cout << "xqz - huffman compress by xq" << endl;
+        return 0;
+    }
     //设置光标不显示
     CONSOLE_CURSOR_INFO cci;
     cci.bVisible = FALSE;
@@ -499,6 +617,14 @@ int main(int argc, char **argv)
                 parse_path(target);
                 decompress(target);
             }
+        }
+        if (result.count("s"))
+        {
+            show((char *)result["s"].as<string>().c_str());
+            cci.dwSize = 20;
+            cci.bVisible = TRUE;
+            SetConsoleCursorInfo(handle, &cci);
+            return 0;
         }
     }
     catch (const cxxopts::OptionException &e)

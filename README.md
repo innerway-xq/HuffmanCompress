@@ -108,19 +108,19 @@ else if (_S_IFREG & buf.st_mode) {
 ```
 [1 or 0]		# 1 - file; 0 - folder
 ############# if file ################
-./[file_name]
+.\[file_name]
 [压缩文件长度]
 # code2word
 [code]:[word]
 ...
 [compressed file]
 ############# if folder ##############
-./[folder_name]
+.\[folder_name]
 [number of empty folder]
-/...					# 空文件夹相对根文件夹路径
+\...					# 空文件夹相对根文件夹路径
 ...
 [number of files]
-/[file_path]			# 相对根文件夹路径
+\[file_path]			# 相对根文件夹路径
 [压缩文件长度]			-
 # code2word				|
 [code]:[word]			|
