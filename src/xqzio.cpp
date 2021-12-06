@@ -108,8 +108,7 @@ void xqz_read_src_compress(const char *filename)
     cnt_freq(buf, length % MAX_IO_N);
     fin.close();
     // update_bar(max_i,max_i);
-    cout << endl
-         << filename << " input finished" << endl;
+    cout << filename << " input finished" << endl;
 }
 
 void cnt_freq(uc *x, int l)
@@ -271,9 +270,11 @@ void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr,
     fin.close();
     fout.close();
     if (max_i)
+    {
         update_bar(max_i, max_i);
-    cout << endl
-         << srcfilename << " compress finished" << endl;
+        cout << endl;
+    }
+    cout << srcfilename << " compress finished" << endl;
 }
 
 void read_code2word(ifstream &fin)
@@ -423,9 +424,11 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
     fout.close();
     fin.read(buf_in, 1);
     if (max_i)
+    {
         update_bar(max_i, max_i);
-    cout << endl
-         << "decompress " << dest << " finished" << endl;
+        cout << endl;
+    }
+    cout << "decompress " << dest << " finished" << endl;
 }
 
 bool dest_exist(string dest)
@@ -463,7 +466,7 @@ void update_bar(int i, int max_i)
     if (i % (max_i / BAR_WIDTH) && i != max_i)
         return;
     char a[4] = {'|', '/', '-', '\\'};
-    int j;
+    register int j;
     cout << a[(i * BAR_WIDTH / max_i) % 4];
     cout << "[";
     for (j = 0; j < i * BAR_WIDTH / max_i; j++)
