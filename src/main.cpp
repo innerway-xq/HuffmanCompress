@@ -379,26 +379,29 @@ void init_options()
         .add_options()("c,compress", "compress something", cxxopts::value<vector<string>>(), "<file/folder>")("n,name", "set output name", cxxopts::value<string>(), "<name>")("x,extract", "extract .xqz file", cxxopts::value<string>(), "<file>")("t,to", "place the output into <directory>", cxxopts::value<string>(), "<directory>")("s,show", "show files", cxxopts::value<string>(), "<file>")("h,help", "print help");
 }
 
-void parse_path(char *x)
+void parse_path(string &x)
 {
-    if (x[strlen(x) - 1] == '/' or x[strlen(x) - 1] == '\\')
-        x[strlen(x) - 1] = '\0';
-    for (int i = 0; i < strlen(x); ++i)
+    for (int i = 0; i < x.size(); ++i)
     {
         if (x[i] == '/')
         {
             x[i] = '\\';
         }
     }
+    if (x[0] != '.' || x[0] != '\\')
+    {
+        x = ".\\" + x;
+    }
+    if (x[x.size() - 1] == '\\')
+        x[x.size() - 1] = '\0';
     return;
 }
 
 void show(char *target)
 {
-    parse_path(target);
     if (target[strlen(target) - 4] != '.' || target[strlen(target) - 3] != 'x' || target[strlen(target) - 2] != 'q' || target[strlen(target) - 1] != 'z')
     {
-        cout<<"not .xqz file"<<endl;
+        cout << "not .xqz file" << endl;
         return;
     }
     ifstream fin(target, ios::binary | ios::in);
@@ -490,14 +493,17 @@ void show(char *target)
 
             getline(fin, buf);
             int file_size = strtol(buf.c_str(), nullptr, 10);
-            if(!file_size){
+            if (!file_size)
+            {
                 continue;
             }
             int file_size_byte = file_size / 8 + bool(file_size % 8);
-            for(;;){
-                getline(fin,buf);
-                if(buf == "*") break;
-            } 
+            for (;;)
+            {
+                getline(fin, buf);
+                if (buf == "*")
+                    break;
+            }
             fin.seekg(file_size_byte + 1, ios::cur);
         }
         root->printDirTree(0);
@@ -537,12 +543,13 @@ int main(int argc, char **argv)
             vector<string> compress_src = result["c"].as<vector<string>>();
             if (result.count("t"))
             {
-                char *dest_directory = (char *)result["t"].as<string>().c_str();
-                parse_path(dest_directory);
+                string to_tmp = result["t"].as<string>();
+                parse_path(to_tmp);
+                char *dest_directory = (char *)to_tmp.c_str();
                 if (compress_src.size() == 1)
                 {
+                    parse_path(compress_src[0]);
                     char *target = (char *)compress_src[0].c_str();
-                    parse_path(target);
                     compress(target, dest_directory);
                 }
                 else
@@ -558,8 +565,8 @@ int main(int argc, char **argv)
                     mkdir(tmp);
                     for (string i : compress_src)
                     {
+                        parse_path(i);
                         char *target = (char *)i.c_str();
-                        parse_path(target);
                         sprintf(code, "copy %s %s", target, tmp);
                         system(code);
                     }
@@ -572,8 +579,8 @@ int main(int argc, char **argv)
             {
                 if (compress_src.size() == 1)
                 {
+                    parse_path(compress_src[0]);
                     char *target = (char *)compress_src[0].c_str();
-                    parse_path(target);
                     compress(target);
                 }
                 else
@@ -589,8 +596,8 @@ int main(int argc, char **argv)
                     mkdir(tmp);
                     for (string i : compress_src)
                     {
+                        parse_path(i);
                         char *target = (char *)i.c_str();
-                        parse_path(target);
                         sprintf(code, "copy %s %s", target, tmp);
                         system(code);
                     }
@@ -605,22 +612,25 @@ int main(int argc, char **argv)
             string decompress_src = result["x"].as<string>();
             if (result.count("t"))
             {
-                char *dest_directory = (char *)result["t"].as<string>().c_str();
-                parse_path(dest_directory);
+                string to_tmp = result["t"].as<string>();
+                parse_path(to_tmp);
+                char *dest_directory = (char *)to_tmp.c_str();
+                parse_path(decompress_src);
                 char *target = (char *)decompress_src.c_str();
-                parse_path(target);
                 decompress(target, dest_directory);
             }
             else
             {
+                parse_path(decompress_src);
                 char *target = (char *)decompress_src.c_str();
-                parse_path(target);
                 decompress(target);
             }
         }
         if (result.count("s"))
         {
-            show((char *)result["s"].as<string>().c_str());
+            string show_tmp = result["s"].as<string>();
+            parse_path(show_tmp);
+            show((char *)show_tmp.c_str());
             cci.dwSize = 20;
             cci.bVisible = TRUE;
             SetConsoleCursorInfo(handle, &cci);
