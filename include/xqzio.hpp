@@ -17,6 +17,7 @@ extern std::vector<std::string> empty_folders;
 
 bool isFile(const char* path);
 int GetFileSize(const char* file_path);
+int GetFolderSize(const char* folder_path);
 // GetRootPath - 得到根目录
 std::string GetRootPath(std::string src);
 // GetFolderFiles - 得到root下所有文件，存在files里

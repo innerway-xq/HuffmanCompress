@@ -1,5 +1,5 @@
 VPATH = src:include
-objects = main.o HuffmanTree.o xqzio.o fnode.o
+objects = main.o HuffmanTree.o xqzio.o fnode.o CodeTree.o
 cxxopts = cxxopts.hpp
 target = xqz.exe
 

@@ -1,5 +1,6 @@
 #include "xqzio.hpp"
 #include "HuffmanTree.hpp"
+#include "CodeTree.hpp"
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -38,6 +39,13 @@ int GetFileSize(const char *file_path)
     struct stat buf;
     stat(file_path, &buf);
     return buf.st_size;
+}
+int GetFolderSize(const char *folder_path){
+    int ret=0;
+    for(string i : files){
+        ret+=GetFileSize(i.c_str());
+    }
+    return ret;
 }
 
 string GetRootPath(string src)
@@ -108,7 +116,7 @@ void xqz_read_src_compress(const char *filename)
     cnt_freq(buf, length % MAX_IO_N);
     fin.close();
     // update_bar(max_i,max_i);
-    cout << filename << " input finished" << endl;
+    // cout << filename << " input finished" << endl;
 }
 
 void cnt_freq(uc *x, int l)
@@ -160,7 +168,7 @@ void Code2WordinFile(std::ofstream &fout)
 
 void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr, const char *destfilename)
 {
-    cout << "writing " << destfilename << endl;
+    // cout << "writing " << destfilename << endl;
     uc buf_out[MAX_IO_N] = {};
     ofstream fout;
     fout.open(destfilename, ios::app | ios::binary);
@@ -274,7 +282,7 @@ void xqz_write_dest_compress(const char *srcfilename, const char *relative_addr,
         update_bar(max_i, max_i);
         cout << endl;
     }
-    cout << srcfilename << " compress finished" << endl;
+    // cout << srcfilename << " compress finished" << endl;
 }
 
 void read_code2word(ifstream &fin)
@@ -308,7 +316,8 @@ void read_code2word(ifstream &fin)
 void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
 {
     char buf_in[MAX_IO_N] = {};
-    string buf_string = "";
+    // string buf_string = "";
+    int buf_p = 0;
 
     char buf_out[MAX_IO_N] = {};
     int out_l = 0;
@@ -333,6 +342,7 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
         max_i = src_bytes_l / MAX_IO_N;
         left_j = src_bytes_l % MAX_IO_N - 1;
     }
+
     for (register ull i = 0; i < max_i; ++i)
     {
         if (max_i)
@@ -342,8 +352,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
         {
             for (register uc k = 0x80; k; k >>= 1)
             {
-                buf_string += bool(buf_in[j] & k);
-                if (code2word.count(buf_string))
+                buf_p = codetreenodes[buf_p].child[bool(buf_in[j] & k)];
+                if (codetreenodes[buf_p].word)
                 {
                     if (out_l >= MAX_IO_N)
                     {
@@ -351,8 +361,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
                         memset(buf_out, 0, sizeof(buf_out));
                         out_l = 0;
                     }
-                    buf_out[out_l++] = code2word[buf_string];
-                    buf_string = "";
+                    buf_out[out_l++] = codetreenodes[buf_p].word;
+                    buf_p = 0;
                 }
             }
         }
@@ -363,8 +373,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
     {
         for (register uc k = 0x80; k; k >>= 1)
         {
-            buf_string += bool(buf_in[j] & k);
-            if (code2word.count(buf_string))
+            buf_p = codetreenodes[buf_p].child[bool(buf_in[j] & k)];
+            if (codetreenodes[buf_p].word)
             {
                 if (out_l >= MAX_IO_N)
                 {
@@ -372,8 +382,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
                     memset(buf_out, 0, sizeof(buf_out));
                     out_l = 0;
                 }
-                buf_out[out_l++] = code2word[buf_string];
-                buf_string = "";
+                buf_out[out_l++] = codetreenodes[buf_p].word;
+                buf_p = 0;;
             }
         }
     }
@@ -382,8 +392,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
         fin.read(buf_in, 1);
         for (register uc k = 0x80; k >= left_k; k >>= 1)
         {
-            buf_string += bool(buf_in[0] & k);
-            if (code2word.count(buf_string))
+            buf_p = codetreenodes[buf_p].child[bool(buf_in[0] & k)];
+            if (codetreenodes[buf_p].word)
             {
                 if (out_l >= MAX_IO_N)
                 {
@@ -391,8 +401,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
                     memset(buf_out, 0, sizeof(buf_out));
                     out_l = 0;
                 }
-                buf_out[out_l++] = code2word[buf_string];
-                buf_string = "";
+                buf_out[out_l++] = codetreenodes[buf_p].word;
+                buf_p = 0;
             }
         }
     }
@@ -401,8 +411,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
         fin.read(buf_in, 1);
         for (register uc k = 0x80; k; k >>= 1)
         {
-            buf_string += bool(buf_in[0] & k);
-            if (code2word.count(buf_string))
+            buf_p = codetreenodes[buf_p].child[bool(buf_in[0] & k)];
+            if (codetreenodes[buf_p].word)
             {
                 if (out_l >= MAX_IO_N)
                 {
@@ -410,8 +420,8 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
                     memset(buf_out, 0, sizeof(buf_out));
                     out_l = 0;
                 }
-                buf_out[out_l++] = code2word[buf_string];
-                buf_string = "";
+                buf_out[out_l++] = codetreenodes[buf_p].word;
+                buf_p = 0;
             }
         }
     }
@@ -428,7 +438,7 @@ void xqz_write_dest_decompress(ifstream &fin, const char *dest, ull src_l)
         update_bar(max_i, max_i);
         cout << endl;
     }
-    cout << "decompress " << dest << " finished" << endl;
+    // cout << "decompress " << dest << " finished" << endl;
 }
 
 bool dest_exist(string dest)

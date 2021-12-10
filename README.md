@@ -87,6 +87,10 @@ else if (_S_IFREG & buf.st_mode) {
 
   > https://www.cnblogs.com/seafever/p/12345200.html
 
+- [ ] 计时 修改
+
+  help 不计时
+
 
 
 
@@ -130,3 +134,6 @@ else if (_S_IFREG & buf.st_mode) {
 
 ```
 
+
+
+图像，视频，音频压缩效果极差，因为256种字节码均匀概率出现

@@ -3,6 +3,7 @@
 #include "xq_debug.hpp"
 #include "cxxopts.hpp"
 #include "fnode.hpp"
+#include "CodeTree.hpp"
 #include <iostream>
 #include <fstream>
 #include <windows.h>
@@ -59,6 +60,8 @@ void compress(const char *target)
         cout << "no such file!" << endl;
         return;
     }
+    int src_size,dest_size;
+    double rate;
     if (isFile(target))
     {
         string root = "";          //根目录
@@ -71,7 +74,7 @@ void compress(const char *target)
         dest.assign(target).append(".xqz");
         if (dest_exist(dest))
         {
-            cout << "compressed file exists" << endl;
+            cout << "compressed file exists (maybe try another directory, using -t)" << endl;
             return;
         }
 
@@ -80,9 +83,19 @@ void compress(const char *target)
         fout.close();
 
         compress_file(target, relative_addr, dest);
+        src_size = GetFileSize(target);
+        dest_size = GetFileSize(dest.c_str());
+        rate = (double)dest_size * 100.0 / src_size;
+        printf("src: %dB  dest: %dB  rate: %.2lf%%  time: ", src_size, dest_size, rate);
     }
     else
     {
+        string tmpp;
+        tmpp.assign(target);
+        if(tmpp == ".\\." || tmpp==".\\.."){
+            cout<<"please first change directory(cd ..)"<<endl;
+            return;
+        }
         string root = "";          //根目录
         string relative_addr = ""; //相对目录
         string dest = "";          //压缩文件路径
@@ -91,7 +104,7 @@ void compress(const char *target)
         dest.assign(target).append(".xqz");
         if (dest_exist(dest))
         {
-            cout << "compressed file exists" << endl;
+            cout << "compressed file exists (maybe try another directory, using -t)" << endl;
             return;
         }
 
@@ -126,6 +139,10 @@ void compress(const char *target)
             relative_addr.assign(i).erase(0, strlen(target));
             compress_file(i.c_str(), relative_addr, dest);
         }
+        src_size = GetFolderSize(target);
+        dest_size = GetFileSize(dest.c_str());
+        rate = (double)dest_size * 100.0 / src_size;
+        printf("src: %dB  dest: %dB  rate: %.2lf%%  time: ", src_size, dest_size, rate);
     }
 }
 
@@ -136,6 +153,8 @@ void compress(const char *target, const char *dest_directory)
         cout << "no such file!" << endl;
         return;
     }
+    int src_size, dest_size;
+    double rate;
     if (isFile(target))
     {
         string root = "";          //根目录
@@ -148,7 +167,7 @@ void compress(const char *target, const char *dest_directory)
         dest.assign(dest_directory).append(relative_addr.substr(1)).append(".xqz");
         if (dest_exist(dest))
         {
-            cout << "compressed file exists" << endl;
+            cout << "compressed file exists (maybe try another directory, using -t)" << endl;
             return;
         }
 
@@ -157,9 +176,20 @@ void compress(const char *target, const char *dest_directory)
         fout.close();
 
         compress_file(target, relative_addr, dest);
+        src_size = GetFileSize(target);
+        dest_size = GetFileSize(dest.c_str());
+        rate = (double)dest_size*100.0/src_size;
+        printf("src: %dB  dest: %dB  rate: %.2lf%%  time: ",src_size,dest_size,rate);
     }
     else
     {
+        string tmpp;
+        tmpp.assign(target);
+        if (tmpp == "." || tmpp == "..")
+        {
+            cout << "please first change directory(cd ..)" << endl;
+            return;
+        }
         string root = "";          //根目录
         string relative_addr = ""; //相对目录
         string dest = "";          //压缩文件路径
@@ -170,7 +200,7 @@ void compress(const char *target, const char *dest_directory)
         dest.assign(dest_directory).append(relative_addr.substr(1)).append(".xqz");
         if (dest_exist(dest))
         {
-            cout << "compressed file exists" << endl;
+            cout << "compressed file exists (maybe try another directory, using -t)" << endl;
             return;
         }
 
@@ -203,9 +233,12 @@ void compress(const char *target, const char *dest_directory)
         for (string i : files)
         {
             relative_addr.assign(i).erase(0, strlen(target));
-            // cout<<i<<" "<<relative_addr<<endl;
             compress_file(i.c_str(), relative_addr, dest);
         }
+        src_size = GetFolderSize(target);
+        dest_size = GetFileSize(dest.c_str());
+        rate = (double)dest_size * 100.0 / src_size;
+        printf("src: %dB  dest: %dB  rate: %.2lf%%  time: ", src_size, dest_size, rate);
     }
 }
 
@@ -226,6 +259,7 @@ void decompress_file(ifstream &fin, const char *dest)
     else
     {
         read_code2word(fin);
+        GenerateCodeTree();
         xqz_write_dest_decompress(fin, dest, src_l);
     }
 }
@@ -256,7 +290,7 @@ void decompress(const char *target)
         dest = root + buf_in.substr(1);
         if (dest_exist(dest.c_str()))
         {
-            cout << "decompressed file exists" << endl;
+            cout << "decompressed file exists (maybe try another directory, using -t)" << endl;
             return;
         }
         decompress_file(fin, dest.c_str());
@@ -272,7 +306,7 @@ void decompress(const char *target)
         getline(fin, root);
         if (dest_exist(root))
         {
-            cout << "decompressed folder exists" << endl;
+            cout << "decompressed folder exists (maybe try another directory, using -t)" << endl;
             return;
         }
         my_mkdir(root.c_str());
@@ -284,7 +318,7 @@ void decompress(const char *target)
             dest = root + relative_addr;
             my_mkdir(dest.c_str());
         }
-        cout << "decompress empty_folder finished" << endl;
+        // cout << "decompress empty_folder finished" << endl;
 
         getline(fin, buf_in);
         file_num = strtol(buf_in.c_str(), nullptr, 10);
@@ -297,6 +331,7 @@ void decompress(const char *target)
         }
         fin.close();
     }
+    printf("time: ");
 }
 
 void decompress(const char *target, const char *dest_directory)
@@ -322,7 +357,7 @@ void decompress(const char *target, const char *dest_directory)
         dest = dest_directory + buf_in.substr(1);
         if (dest_exist(dest.c_str()))
         {
-            cout << "decompressed file exists (maybe try other directory, using -t)" << endl;
+            cout << "decompressed file exists (maybe try another directory, using -t)" << endl;
             return;
         }
         decompress_file(fin, dest.c_str());
@@ -339,7 +374,7 @@ void decompress(const char *target, const char *dest_directory)
         root = dest_directory + root.substr(1);
         if (dest_exist(root))
         {
-            cout << "decompressed folder exists" << endl;
+            cout << "decompressed folder exists (maybe try another directory, using -t)" << endl;
             return;
         }
         my_mkdir(root.c_str());
@@ -364,6 +399,7 @@ void decompress(const char *target, const char *dest_directory)
         }
         fin.close();
     }
+    printf("time: ");
 }
 
 cxxopts::Options options("xqz", " - huffman compress by xq");
@@ -537,7 +573,22 @@ int main(int argc, char **argv)
         if (result.count("h"))
         {
             cout << options.help() << endl;
+            cci.dwSize = 20;
+            cci.bVisible = TRUE;
+            SetConsoleCursorInfo(handle, &cci);
+            return 0;
         }
+        if (result.count("s"))
+        {
+            string show_tmp = result["s"].as<string>();
+            parse_path(show_tmp);
+            show((char *)show_tmp.c_str());
+            cci.dwSize = 20;
+            cci.bVisible = TRUE;
+            SetConsoleCursorInfo(handle, &cci);
+            return 0;
+        }
+
         if (result.count("c"))
         {
             vector<string> compress_src = result["c"].as<vector<string>>();
@@ -607,6 +658,7 @@ int main(int argc, char **argv)
                 }
             }
         }
+        
         if (result.count("x"))
         {
             string decompress_src = result["x"].as<string>();
@@ -626,16 +678,7 @@ int main(int argc, char **argv)
                 decompress(target);
             }
         }
-        if (result.count("s"))
-        {
-            string show_tmp = result["s"].as<string>();
-            parse_path(show_tmp);
-            show((char *)show_tmp.c_str());
-            cci.dwSize = 20;
-            cci.bVisible = TRUE;
-            SetConsoleCursorInfo(handle, &cci);
-            return 0;
-        }
+        
     }
     catch (const cxxopts::OptionException &e)
     {
