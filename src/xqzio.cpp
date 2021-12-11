@@ -1,7 +1,6 @@
 #include "xqzio.hpp"
 #include "HuffmanTree.hpp"
 #include "CodeTree.hpp"
-#include "xq_debug.hpp"
 #include <iostream>
 #include <fstream>
 #include <cstring>

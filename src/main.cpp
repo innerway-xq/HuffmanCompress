@@ -1,6 +1,5 @@
 #include "HuffmanTree.hpp"
 #include "xqzio.hpp"
-#include "xq_debug.hpp"
 #include "cxxopts.hpp"
 #include "fnode.hpp"
 #include "CodeTree.hpp"
