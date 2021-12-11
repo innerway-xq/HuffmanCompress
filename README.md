@@ -117,7 +117,13 @@ else if (_S_IFREG & buf.st_mode) {
 # code2word
 [code]:[word]
 ...
+*
 [compressed file]
+############ fake compress ###########
+.\[file_name]
+[文件长度]
+**
+...
 ############# if folder ##############
 .\[folder_name]
 [number of empty folder]
@@ -129,6 +135,7 @@ else if (_S_IFREG & buf.st_mode) {
 # code2word				|
 [code]:[word]			|
 ...						|
+*                       |
 [compressed file]		-
 ...
 

@@ -8,7 +8,8 @@
 class CodeTreeNode
 {
 public:
-    uc word = 0;
+    bool is_word = false;
+    uc word;
     int child[2] = {0,0}; // 0 - left, 1 - right
 };
 extern std::vector<CodeTreeNode> codetreenodes;

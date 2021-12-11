@@ -1,5 +1,6 @@
 #include "CodeTree.hpp"
 #include "HuffmanTree.hpp"
+#include "xq_debug.hpp"
 
 #include <string>
 #include <iostream>
@@ -25,6 +26,7 @@ void GenerateCodeTree(){
             }
             if(j == i.first.size()-1){
                 codetreenodes.at(p).word = i.second;
+                codetreenodes.at(p).is_word = true;
             }
         }
     }
@@ -33,9 +35,12 @@ void GenerateCodeTree(){
     //     int i;
     //     std::cin>>i;
     //     p = codetreenodes.at(p).child[i];
-    //     if (codetreenodes.at(p).word){
-    //         std::cout << codetreenodes.at(p).word << std::endl;
+    //     if (codetreenodes.at(p).is_word){
+    //         std::cout << (int)codetreenodes.at(p).word << codetreenodes.at(p).word << std::endl;
     //         p = 0;
+    //     }
+    //     if(i == 90){
+    //         break;
     //     }
     // }
 }

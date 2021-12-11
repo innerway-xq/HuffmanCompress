@@ -17,6 +17,7 @@ void init_externs()
     idx2nodes.clear();
     word2code.clear();
     code2word.clear();
+    codetreenodes.clear();
     memset(word2nodes_addr, 0, sizeof(word2nodes_addr));
     memset(word_freq, 0, sizeof(word_freq));
 }
@@ -46,11 +47,16 @@ void compress_file(const char *src, string relative_addr, string dest)
         }
     }
     GenerateHuffmanTree(tree);
-    // cout << "GenerateHuffmanTree finished" << endl;
     word2code = tree->GenerateWord2Code();
     code2word = tree->GenerateCode2Word();
-    // testword2code(word2code);
-    xqz_write_dest_compress(src, relative_addr.c_str(), dest.c_str());
+    if (GetFileSize(src) <= compressed_code2word_length())
+    {
+        fake_xqz_write_dest_compress(src, relative_addr.c_str(), dest.c_str());
+    }
+    else
+    {
+        xqz_write_dest_compress(src, relative_addr.c_str(), dest.c_str());
+    }
 }
 
 void compress(const char *target)
@@ -60,7 +66,7 @@ void compress(const char *target)
         cout << "no such file!" << endl;
         return;
     }
-    int src_size,dest_size;
+    int src_size, dest_size;
     double rate;
     if (isFile(target))
     {
@@ -92,8 +98,9 @@ void compress(const char *target)
     {
         string tmpp;
         tmpp.assign(target);
-        if(tmpp == ".\\." || tmpp==".\\.."){
-            cout<<"please first change directory(cd ..)"<<endl;
+        if (tmpp == ".\\." || tmpp == ".\\..")
+        {
+            cout << "please first change directory(cd ..)" << endl;
             return;
         }
         string root = "";          //根目录
@@ -178,8 +185,8 @@ void compress(const char *target, const char *dest_directory)
         compress_file(target, relative_addr, dest);
         src_size = GetFileSize(target);
         dest_size = GetFileSize(dest.c_str());
-        rate = (double)dest_size*100.0/src_size;
-        printf("src: %dB  dest: %dB  rate: %.2lf%%  time: ",src_size,dest_size,rate);
+        rate = (double)dest_size * 100.0 / src_size;
+        printf("src: %dB  dest: %dB  rate: %.2lf%%  time: ", src_size, dest_size, rate);
     }
     else
     {
@@ -245,7 +252,7 @@ void compress(const char *target, const char *dest_directory)
 void decompress_file(ifstream &fin, const char *dest)
 {
     init_externs();
-    cout << "decompressing " << dest << endl;
+    cout << "decompressing to " << dest << endl;
     string src_l_tmp;
     ull src_l;
     getline(fin, src_l_tmp);
@@ -258,9 +265,16 @@ void decompress_file(ifstream &fin, const char *dest)
     }
     else
     {
-        read_code2word(fin);
-        GenerateCodeTree();
-        xqz_write_dest_decompress(fin, dest, src_l);
+        bool flag = read_code2word(fin);
+        if (flag)
+        {
+            GenerateCodeTree();
+            xqz_write_dest_decompress(fin, dest, src_l);
+        }
+        else
+        {
+            fake_xqz_write_dest_decompress(fin, dest, src_l);
+        }
     }
 }
 
@@ -318,7 +332,7 @@ void decompress(const char *target)
             dest = root + relative_addr;
             my_mkdir(dest.c_str());
         }
-        // cout << "decompress empty_folder finished" << endl;
+        cout << "decompress empty_folder finished" << endl;
 
         getline(fin, buf_in);
         file_num = strtol(buf_in.c_str(), nullptr, 10);
@@ -596,6 +610,7 @@ int main(int argc, char **argv)
             {
                 string to_tmp = result["t"].as<string>();
                 parse_path(to_tmp);
+                my_mkdir(to_tmp.c_str());
                 char *dest_directory = (char *)to_tmp.c_str();
                 if (compress_src.size() == 1)
                 {
@@ -618,11 +633,11 @@ int main(int argc, char **argv)
                     {
                         parse_path(i);
                         char *target = (char *)i.c_str();
-                        sprintf(code, "copy %s %s", target, tmp);
+                        sprintf(code, "copy \"%s\" \"%s\" >nul", target, tmp);
                         system(code);
                     }
                     compress(tmp, dest_directory);
-                    sprintf(code, "rmdir /Q/S %s", tmp);
+                    sprintf(code, "rmdir /Q/S \"%s\" >nul", tmp);
                     system(code);
                 }
             }
@@ -649,23 +664,32 @@ int main(int argc, char **argv)
                     {
                         parse_path(i);
                         char *target = (char *)i.c_str();
-                        sprintf(code, "copy %s %s", target, tmp);
+                        sprintf(code, "copy \"%s\" \"%s\" >nul", target, tmp);
                         system(code);
                     }
                     compress(tmp);
-                    sprintf(code, "rmdir /Q/S %s", tmp);
+                    sprintf(code, "rmdir /Q/S \"%s\" >nul", tmp);
                     system(code);
                 }
             }
         }
-        
+
         if (result.count("x"))
         {
             string decompress_src = result["x"].as<string>();
+            if (decompress_src[decompress_src.size() - 4] != '.' || decompress_src[decompress_src.size() - 3] != 'x' || decompress_src[decompress_src.size() - 2] != 'q' || decompress_src[decompress_src.size() - 1] != 'z')
+            {
+                cci.dwSize = 20;
+                cci.bVisible = TRUE;
+                SetConsoleCursorInfo(handle, &cci);
+                cout << "not .xqz file" << endl;
+                return 0;
+            }
             if (result.count("t"))
             {
                 string to_tmp = result["t"].as<string>();
                 parse_path(to_tmp);
+                my_mkdir(to_tmp.c_str());
                 char *dest_directory = (char *)to_tmp.c_str();
                 parse_path(decompress_src);
                 char *target = (char *)decompress_src.c_str();
@@ -678,7 +702,6 @@ int main(int argc, char **argv)
                 decompress(target);
             }
         }
-        
     }
     catch (const cxxopts::OptionException &e)
     {

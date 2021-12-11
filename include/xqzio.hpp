@@ -16,8 +16,10 @@ extern std::vector<std::string> files;
 extern std::vector<std::string> empty_folders;
 
 bool isFile(const char* path);
-int GetFileSize(const char* file_path);
-int GetFolderSize(const char* folder_path);
+// GetFileSize - 得到文件大小(按byte)
+ull GetFileSize(const char* file_path);
+// GetFolderSize - 得到文件夹大小(按byte)
+ull GetFolderSize(const char* folder_path);
 // GetRootPath - 得到根目录
 std::string GetRootPath(std::string src);
 // GetFolderFiles - 得到root下所有文件，存在files里
@@ -28,14 +30,20 @@ void xqz_read_src_compress(const char *filename);
 void cnt_freq(uc *x, int l);
 // compressed_length - 压缩文件长度(按bit)
 ull compressed_length();
+// compressed_code2word_length - 压缩文件加上code2word长度(按byte)
+ull compressed_code2word_length();
 // Code2WordinFile - 将code2word写入压缩文件
 void Code2WordinFile(std::ofstream &fout);
 // xqz_write_dest_compress - 读入src文件，压缩后，写入dest文件
 void xqz_write_dest_compress(const char *srcfilename,const char *relative_addr, const char *destfilename);
-// read_code2word - 从压缩文件读取code2word
-void read_code2word(std::ifstream &fin);
+// fake_xqz_write_dest_compress - 不压缩，直接追加在压缩文件末尾
+void fake_xqz_write_dest_compress(const char *srcfilename,const char *relative_addr, const char *destfilename);
+// read_code2word - 从压缩文件读取code2word，返回false，即fake compressed
+bool read_code2word(std::ifstream &fin);
 // xqz_write_dest_decompress - 读入fin流，解压后，写入dest文件 
 void xqz_write_dest_decompress(std::ifstream &fin, const char* dest, ull src_l);
+// fake_xqz_write_dest_decompress - 不需解压，直接写入dest文件
+void fake_xqz_write_dest_decompress(std::ifstream &fin, const char *dest, ull src_l);
 // dest_exist - 检查目标文件是否存在
 bool dest_exist(std::string dest);
 // my_mkdir - 创建多级目录
