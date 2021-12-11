@@ -550,8 +550,13 @@ void show(char *target)
             for (;;)
             {
                 getline(fin, buf);
-                if (buf == "*")
+                if (buf == "*"){
                     break;
+                }
+                else if (buf == "**"){
+                    file_size_byte = file_size;
+                    break;
+                }
             }
             fin.seekg(file_size_byte + 1, ios::cur);
         }
