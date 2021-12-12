@@ -415,7 +415,7 @@ void decompress(const char *target, const char *dest_directory)
     printf("time: ");
 }
 
-cxxopts::Options options("xqz", " - huffman compress by xq");
+cxxopts::Options options("xqz", "xqz - huffman compress by xq");
 void init_options()
 {
     options
